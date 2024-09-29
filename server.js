@@ -10,6 +10,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import fragranceRoutes from './routes/fragranceRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/fragrances', fragranceRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/carts', cartRoutes);
+app.use('/api/auth', authRoutes);
 
 // Start the server
 app.listen(PORT, () => {
