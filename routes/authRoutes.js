@@ -7,13 +7,21 @@ const router = express.Router();
 
 // Register User
 router.post('/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     try {
+        if (name == null || email == null || password == null) {
+            return res.status(400).json({ message: 'Please fill in all fields'})
+        }
+
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
+        }
+
+        if (password.length() < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters'});
         }
 
         // Hash the password
