@@ -25,6 +25,15 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/:limit', async (req, res) => {
+    try {
+        const fragrances = await Fragrance.find().populate('category').limit(req.params.limit);
+        res.json(fragrances);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Update a fragrance
 router.put('/:id', async (req, res) => {
     try {
