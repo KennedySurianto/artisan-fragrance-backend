@@ -2,26 +2,38 @@ import express from 'express';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import validator from 'validator';
+import authLimiter from '../middlewares/authLimiter.js';
 
 const router = express.Router();
 
 // Register User
 router.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     try {
         if (name == null || email == null || password == null) {
-            return res.status(400).json({ message: 'Please fill in all fields'})
+            return res.status(400).json({ message: 'Please fill in all fields' })
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ email });
+        const normalizedEmail = email.toLowerCase();
+        const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        if (password.length() < 8) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters'});
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ message: 'Invalid email address' });
+        }
+
+        if (!validator.isStrongPassword(password)) {
+            return res.status(400).json({ message: 'Password is not strong enough' });
+        }
+
+        // Check if password length is at least 8 characters
+        if (password.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters' });
         }
 
         // Hash the password
@@ -43,7 +55,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login User
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -66,6 +78,12 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+
+// Logout Route
+router.post('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Logged out successfully' });
 });
 
 export default router;
